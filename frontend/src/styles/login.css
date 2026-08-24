@@ -1,0 +1,213 @@
+/* ==================================================================
+   Sign-in pages (student + mess staff)
+   ================================================================== */
+
+.login-page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  background: var(--canvas);
+}
+
+/* ---------- Brand panel ---------- */
+
+.login-brand-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px 48px;
+  background: var(--navy-800);
+  color: #dbe4f0;
+}
+
+.login-brand-panel::after {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  right: -150px;
+  bottom: -170px;
+  border-radius: 50%;
+  background: rgba(22, 160, 106, 0.14);
+  pointer-events: none;
+}
+
+.login-brand-panel.is-staff::after { background: rgba(43, 79, 128, 0.35); }
+
+.login-brand-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-brand-head .brand-name { font-size: 17px; }
+
+.login-pitch { position: relative; z-index: 1; max-width: 32rem; }
+
+.login-pitch h2 {
+  color: #fff;
+  font-size: 30px;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.login-pitch p {
+  font-size: 15px;
+  color: #b9c8de;
+}
+
+.login-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.flow-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.09);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #e6edf7;
+}
+
+.flow-step span[aria-hidden] { opacity: 0.8; }
+
+.login-foot {
+  position: relative;
+  z-index: 1;
+  font-size: 12.5px;
+  color: #8ea3c0;
+}
+
+/* ---------- Form panel ---------- */
+
+.login-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  background: var(--green-50);
+  border: 1px solid #cbe7da;
+  color: var(--green-700);
+  font-size: 12.5px;
+  font-weight: 650;
+  margin-bottom: 16px;
+}
+
+.login-eyebrow.is-staff {
+  background: var(--blue-50);
+  border-color: #c8ddf1;
+  color: var(--blue-600);
+}
+
+.login-card h1 {
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.login-card > p.login-lede {
+  font-size: 14.5px;
+  color: var(--ink-500);
+  margin-bottom: 24px;
+}
+
+.login-form { display: flex; flex-direction: column; gap: 16px; }
+
+.login-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--red-50);
+  border: 1px solid #f2c9c3;
+  color: var(--red-700);
+  font-size: 13.5px;
+  font-weight: 550;
+  animation: confirm-in 0.2s var(--ease);
+}
+
+.login-hint {
+  font-size: 12.5px;
+  color: var(--ink-500);
+}
+
+.demo-creds {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-sunken);
+}
+
+.demo-creds-title {
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin-bottom: 8px;
+}
+
+.demo-creds code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  color: var(--ink-800);
+}
+
+.demo-creds-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ink-600);
+  padding: 2px 0;
+}
+
+.login-switch {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 13.5px;
+  color: var(--ink-500);
+}
+
+.login-switch a {
+  font-weight: 650;
+  color: var(--navy-700);
+}
+
+@media (max-width: 900px) {
+  .login-page { grid-template-columns: 1fr; }
+
+  .login-brand-panel {
+    padding: 26px 20px;
+    gap: 18px;
+  }
+
+  .login-pitch h2 { font-size: 22px; }
+  .login-pitch p { font-size: 14px; }
+  .login-flow { display: none; }
+  .login-foot { display: none; }
+  .login-form-panel { padding: 28px 20px 44px; }
+}
