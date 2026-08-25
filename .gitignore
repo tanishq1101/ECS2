@@ -4,3 +4,6 @@ dist/
 .env.local
 .DS_Store
 *.log
+
+# SQLite database + WAL sidecars (rebuild with: cd backend && npm run db:reset)
+backend/data/

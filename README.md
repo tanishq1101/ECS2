@@ -17,13 +17,18 @@ Smart Food Wastage Analyser
 
 ---
 
-## Demo / prototype mode
+## What is real, and what is not
 
-This build is deliberately a prototype. It does **not** have:
+**Persisted in SQLite** (`backend/db/schema.sql`): accounts, meal intentions, attendance rows,
+notification read state, student preferences and login sessions. A student's response survives
+a server restart, and so does their session.
 
-* a PostgreSQL/MySQL database — data lives in `backend/mockData.js`
-* ESP32 + fingerprint sensor hardware — attendance records are demo data
+Still **not** connected:
+
+* ESP32 + fingerprint sensor hardware — attendance rows are seeded demo records
 * a trained ML model — the staff prediction page shows clearly-labelled placeholders
+* mess-wide staff aggregates (486 students, waste totals) — placeholder figures, since the two
+  demo accounts obviously cannot produce them
 
 The UI says so wherever it matters, so no screen claims a fingerprint was scanned or a model
 was run when neither happened.
@@ -52,7 +57,10 @@ npm install
 npm start
 ```
 
-The API runs at **http://localhost:5001**.
+The API runs at **http://localhost:5001**. On first start it creates
+`backend/data/smartmess.db`, applies the schema and seeds three weeks of demo history — there is
+no separate migration step. The file is gitignored; `npm run db:reset` rebuilds it from scratch,
+and `DB_PATH` points the server at a different file.
 
 ### 3. Start the frontend (Terminal 2)
 
@@ -91,8 +99,17 @@ endpoint decides which portal a session lands in.
 backend/
   server.js          Express app, CORS, health check, reserved hardware endpoint
   auth.js            Token issue/verify, requireAuth + requireRole guards
-  mockData.js        ALL prototype data and the accessors the routes call
+  password.js        scrypt hashing (node crypto — no dependency)
+  store.js           Every accessor the routes call; the only place SQL is written
+  db/
+    schema.sql       Tables, constraints and indexes
+    index.js         Connection; applies the schema on every boot
+    seed.js          Reference data + an idempotent demo-history top-up
+  data/              The SQLite file lives here (gitignored)
   routes/api.js      Every endpoint, grouped by role
+  scripts/
+    smoke-test.js    End-to-end API test, including a restart  (npm test)
+    reset-db.js      Delete and rebuild the database           (npm run db:reset)
 
 frontend/src/
   App.jsx                     Routes for both portals
@@ -125,7 +142,7 @@ POST   /api/auth/login          → { token, user: { role, … } }
 POST   /api/auth/logout
 GET    /api/auth/me
 GET    /api/profile
-GET    /api/health
+GET    /api/health              → { database: 'connected', mlService, fingerprintHardware, … }
 ```
 
 Student (role: `student`):
@@ -155,6 +172,41 @@ session cannot read any mess-wide totals, predictions or preparation quantities.
 
 ---
 
+## Database
+
+SQLite, via `better-sqlite3`. One file at `backend/data/smartmess.db`, created and migrated on
+first boot — `db/schema.sql` is entirely `CREATE ... IF NOT EXISTS`, so applying it on every
+start is both the first-run setup and a no-op afterwards.
+
+| Table | Holds |
+| --- | --- |
+| `users` | Accounts for both roles. Passwords are scrypt hashes, never plain text. |
+| `sessions` | Bearer tokens, so restarting the API no longer signs everyone out. |
+| `meals` · `menu_items` | Meal windows, cutoffs and the weekly menu rotation. |
+| `meal_intents` | What the student said. PK `(student_id, meal_date, meal_id)`. |
+| `attendance` | What was recorded at the entrance. Same PK, separate table — see below. |
+| `notifications` · `notification_reads` | Shared bodies, per-student read state. |
+| `preferences` | One row per student. |
+
+Seeding runs on every boot and is idempotent. `seedReferenceData()` inserts accounts, meals and
+menus once; `seedDemoHistory()` tops up ~3 weeks of intent/attendance rows with
+`INSERT OR IGNORE`, so a database seeded last week gains only the days it is missing and a row a
+real student wrote is never overwritten.
+
+### Testing
+
+```bash
+cd backend
+npm test
+```
+
+Boots the real server against a throwaway database, drives it over HTTP the way the frontend
+does — auth, role separation, cutoffs, intents, notifications, preferences, history — then
+restarts it and re-checks that the session, the saved intent, the read state and the preferences
+all survived.
+
+---
+
 ## Two concepts that are never merged
 
 | | Meal intention | Actual attendance |
@@ -174,20 +226,27 @@ explains why. Tomorrow's meals are always open, so there is always something to 
 
 ## Wiring up the real system later
 
-**Database.** Every read and write goes through an accessor in `mockData.js`
-(`getMealsForDate`, `setMealIntent`, `getHistory`, …). The in-memory `Map`s are keyed
-`studentId | date | mealId`, which maps directly onto a composite primary key. Replacing the
-bodies of those functions with SQL queries requires no changes to the routes or the frontend.
+**Database — done.** Every read and write goes through an accessor in `store.js`
+(`getMealsForDate`, `setMealIntent`, `getHistory`, …), which is the only module in the backend
+that writes SQL. The in-memory `Map`s those accessors used to hold were keyed
+`studentId | date | mealId`; that is now the composite primary key of `meal_intents` and
+`attendance`. Because better-sqlite3's API is synchronous, every signature stayed the same and
+no route handler or frontend file had to change.
+
+Moving to Postgres or MySQL later means rewriting the query bodies in `store.js` and making the
+accessors `async` — at which point the route handlers need `await`, but nothing else moves.
 
 **Fingerprint hardware.** `POST /api/hardware/attendance` is reserved in `server.js` and
 currently returns `501`. When the ESP32 posts `{ studentId, mealId, scannedAt, deviceId }`, it
-writes an attendance row with `source: 'fingerprint'`. The student UI already renders that case
-as "Verified by fingerprint" instead of the demo wording — no frontend change needed.
+writes an attendance row with `source: 'fingerprint'`. The `attendance` table already has the
+`source` and `device_id` columns waiting, and the student UI already renders that case as
+"Verified by fingerprint" instead of the demo wording — no frontend change needed.
 
-**ML model.** Student intentions are exactly the training signal the model needs, already
-stored per student, per meal, per day, alongside the attendance that followed. The staff
-predictions endpoint returns `modelStatus: 'not_connected'` today; pointing it at a Python
-service is a change inside one route handler.
+**ML model.** Student intentions are exactly the training signal the model needs, now genuinely
+stored per student, per meal, per day, alongside the attendance that followed —
+`idx_intents_date_meal` and `idx_attendance_date_meal` exist for exactly that aggregate query.
+The staff predictions endpoint returns `modelStatus: 'not_connected'` today; pointing it at a
+Python service is a change inside one route handler.
 
 ```
 Student meal intentions → database → ML model → expected attendance → staff dashboard

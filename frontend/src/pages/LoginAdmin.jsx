@@ -70,8 +70,8 @@ export default function LoginAdmin() {
         </div>
 
         <p className="login-foot">
-          Prototype build · demo data only · no database, fingerprint hardware or ML model is
-          connected yet.
+          Prototype build · responses and attendance are stored in a database · fingerprint
+          hardware and the ML model are not connected yet.
         </p>
       </section>
 

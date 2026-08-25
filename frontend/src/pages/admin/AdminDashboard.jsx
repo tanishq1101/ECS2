@@ -94,8 +94,9 @@ export default function AdminDashboard() {
       <p className="demo-note" style={{ marginTop: 18 }}>
         <span aria-hidden="true">ℹ️</span>
         <span>
-          <strong>Prototype build.</strong> Figures come from the mock API. No database, fingerprint
-          hardware or ML model is connected yet.
+          <strong>Prototype build.</strong> These mess-wide figures are still placeholder values.
+          Student responses and attendance are stored in a database; the fingerprint hardware and
+          the ML model are not connected yet.
         </span>
       </p>
     </>

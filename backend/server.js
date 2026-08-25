@@ -1,13 +1,15 @@
 /**
- * Smart Food Wastage Analyser — prototype API server.
+ * Smart Food Wastage Analyser — API server.
  *
- * Runs in DEMO MODE: no database, no ESP32 fingerprint hardware, no ML service.
- * All data comes from mockData.js through routes/api.js.
+ * Student accounts, meal intentions, attendance, notifications and sessions are
+ * persisted in SQLite (see db/schema.sql). Still not connected: the ESP32
+ * fingerprint reader and the ML service — both are labelled as such in the UI.
  */
 
 const express = require('express');
 const cors = require('cors');
 const apiRoutes = require('./routes/api');
+const { dbPath } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -19,7 +21,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     mode: 'demo',
-    database: 'not_connected',
+    database: 'connected',
+    databaseEngine: 'sqlite',
     mlService: 'not_connected',
     fingerprintHardware: 'not_connected',
   });
@@ -53,5 +56,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Smart Food Wastage Analyser API (demo mode) -> http://localhost:${PORT}`);
+  console.log(`Smart Food Wastage Analyser API -> http://localhost:${PORT}`);
+  console.log(`  database: ${dbPath}`);
 });
