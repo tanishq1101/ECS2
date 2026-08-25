@@ -128,8 +128,9 @@ export default function StudentNotifications() {
       <p className="demo-note" style={{ marginTop: 20 }}>
         <span aria-hidden="true">ℹ️</span>
         <span>
-          <strong>Prototype build.</strong> Notifications are demo messages served by the mock API.
-          Push and email delivery are not wired up yet.
+          <strong>Prototype build.</strong> Notifications are demo messages, though whether you
+          have read them is stored against your account. Push and email delivery are not wired up
+          yet.
         </span>
       </p>
     </>

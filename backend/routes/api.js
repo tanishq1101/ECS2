@@ -5,12 +5,12 @@
  *   /api/...          shared or mess-staff endpoints (existing admin portal)
  *   /api/student/...  student portal endpoints
  *
- * Every handler reads from mockData.js. No data is defined in this file, so the
- * whole prototype can be pointed at a real database by editing that one module.
+ * Every handler reads from store.js. No data is defined in this file, so the
+ * whole backend talks to the database through that one module.
  */
 
 const express = require('express');
-const data = require('../mockData');
+const data = require('../store');
 const { login, logout, requireAuth, requireRole } = require('../auth');
 
 const router = express.Router();
@@ -94,8 +94,9 @@ router.get('/student/meals', ...studentOnly, (req, res) => {
 /**
  * POST /api/student/meals/:mealId/intent
  * Body: { intent: 'attending' | 'not_attending' | 'none', date?: 'YYYY-MM-DD' }
- * This is the single write the student portal makes — the same record that will
- * later feed the attendance database and the ML model's training set.
+ * This is the single write the student portal makes. It lands in `meal_intents`
+ * alongside the attendance that followed — exactly the training set the ML
+ * model will need.
  */
 router.post('/student/meals/:mealId/intent', ...studentOnly, (req, res) => {
   const { mealId } = req.params;
@@ -176,7 +177,7 @@ router.get('/student/profile', ...studentOnly, (req, res) => {
   });
 });
 
-/** Prototype: preferences persist for the lifetime of the server process only. */
+/** Preferences are stored per student and survive a restart. */
 router.patch('/student/preferences', ...studentOnly, (req, res) => {
   res.json({ ok: true, preferences: data.setPreferences(req.user.id, req.body || {}) });
 });

@@ -90,8 +90,8 @@ export default function AdminAnalytics() {
       <p className="demo-note" style={{ marginTop: 18 }}>
         <span aria-hidden="true">ℹ️</span>
         <span>
-          <strong>Prototype build.</strong> Analytics are computed from mock data in
-          <code> backend/mockData.js</code>.
+          <strong>Prototype build.</strong> Mess-wide waste figures are still placeholder
+          values. Student responses and attendance are read from the database.
         </span>
       </p>
     </>

@@ -165,8 +165,8 @@ export default function StudentProfile() {
               <p className="demo-note" style={{ marginTop: 16 }}>
                 <span aria-hidden="true">ℹ️</span>
                 <span>
-                  <strong>Prototype build.</strong> Settings are kept for this server session only —
-                  there is no database behind them yet.
+                  <strong>Prototype build.</strong> Settings are saved to your account and kept
+                  when you sign back in.
                 </span>
               </p>
             </div>

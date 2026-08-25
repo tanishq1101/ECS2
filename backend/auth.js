@@ -1,47 +1,33 @@
 /**
- * Prototype authentication.
+ * Authentication.
  *
- * DEMO MODE: passwords are compared in plain text and sessions live in memory.
- * The route contract (Bearer token in the Authorization header, role attached
- * to req.user) is the real one, so swapping this file for bcrypt + JWT later
- * does not change a single route handler or anything in the frontend.
+ * Passwords are stored as scrypt hashes in the users table and sessions live in
+ * the sessions table, so restarting the API no longer signs everyone out.
+ *
+ * The route contract is unchanged: a Bearer token in the Authorization header,
+ * the user (never the hash) attached to req.user.
  */
 
 const crypto = require('crypto');
-const { users } = require('./mockData');
+const store = require('./store');
+const { verifyPassword } = require('./password');
 
-const sessions = new Map(); // token -> userId
-
-function publicUser(user) {
-  // Never let the password leave this module.
-  const { password, ...safe } = user;
-  return safe;
-}
-
+/** Accepts an email address or a student ID. Returns null on any failure. */
 function login(identifier, password) {
-  const needle = String(identifier || '').trim().toLowerCase();
-  const user = users.find(
-    (u) =>
-      u.email.toLowerCase() === needle ||
-      (u.studentId && u.studentId.toLowerCase() === needle)
-  );
-
-  if (!user || user.password !== password) return null;
+  const found = store.findUserForLogin(identifier);
+  if (!found || !verifyPassword(password, found.passwordHash)) return null;
 
   const token = crypto.randomBytes(24).toString('hex');
-  sessions.set(token, user.id);
-  return { token, user: publicUser(user) };
+  store.createSession(token, found.user.id);
+  return { token, user: found.user };
 }
 
 function logout(token) {
-  return sessions.delete(token);
+  return store.deleteSession(token);
 }
 
 function userForToken(token) {
-  const userId = sessions.get(token);
-  if (!userId) return null;
-  const user = users.find((u) => u.id === userId);
-  return user ? publicUser(user) : null;
+  return store.userForSession(token);
 }
 
 function readToken(req) {
@@ -73,4 +59,4 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { login, logout, userForToken, requireAuth, requireRole, publicUser };
+module.exports = { login, logout, userForToken, requireAuth, requireRole };

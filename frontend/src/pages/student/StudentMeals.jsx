@@ -56,9 +56,9 @@ export default function StudentMeals() {
       <p className="demo-note" style={{ marginBottom: 18 }}>
         <span aria-hidden="true">ℹ️</span>
         <span>
-          <strong>Prototype build.</strong> Menus and attendance records come from demo data.
+          <strong>Prototype build.</strong> Your responses are saved to the database and kept.
           Attendance is recorded at the mess entrance; the fingerprint hardware described in the
-          project design is not connected yet.
+          project design is not connected yet, so those rows are still demo records.
         </span>
       </p>
 

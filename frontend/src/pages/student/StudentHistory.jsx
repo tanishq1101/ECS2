@@ -224,8 +224,9 @@ export default function StudentHistory() {
           <p className="demo-note" style={{ marginTop: 20 }}>
             <span aria-hidden="true">ℹ️</span>
             <span>
-              <strong>Prototype build.</strong> These records are demo data. Once the mess entrance
-              hardware is connected, attendance rows will be written by real scans instead.
+              <strong>Prototype build.</strong> Your responses are stored in the database. The
+              attendance beside them is seeded demo data — once the mess entrance hardware is
+              connected, those rows will be written by real scans instead.
             </span>
           </p>
         </>

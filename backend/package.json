@@ -2,13 +2,16 @@
   "name": "smart-food-wastage-analyser-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "Prototype API for the Smart Food Wastage Analyser (demo mode, mock data)",
+  "description": "API for the Smart Food Wastage Analyser (SQLite-backed)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node scripts/smoke-test.js",
+    "db:reset": "node scripts/reset-db.js"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.5",
     "express": "^4.19.2"
   }

@@ -91,8 +91,8 @@ export default function LoginStudent() {
         </div>
 
         <p className="login-foot">
-          Prototype build · demo data only · no database, fingerprint hardware or ML model is
-          connected yet.
+          Prototype build · your meal responses are saved to a database · fingerprint hardware
+          and the ML model are not connected yet.
         </p>
       </section>
 
